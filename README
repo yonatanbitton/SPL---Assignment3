@@ -1,0 +1,15 @@
+Activation instructions:
+
+1. Run Server, choose between TPCMain or ReactorMain, and run it. 
+   Path is : /home/yonatanbitton/workspace/spl/ass3-TFTPServerClient/Server/src/main/java/bgu/spl171/net/impl
+   "Serve!" should be printed.
+
+2. Run client 
+   Path is : /home/yonatanbitton/workspace/spl/ass3-TFTPServerClient/Client
+   a. First write "make" to compile with the makefile.
+   b. ./bin/TFTPclient - to start running. (Can change host & port at server, client if you'd like, current localhost, 6666.
+
+
+Game rules explained at assignment1-spl172.pdf 
+Path is : /home/yonatanbitton/workspace/spl/ass3-TFTPServerClient
+
