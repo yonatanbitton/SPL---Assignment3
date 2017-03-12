@@ -1,10 +1,5 @@
 
 #include "../include/client.h"
-//#include <stdlib.h>
-//#include "../include/ConnectionHandler.h"
-//#include <string>
-//#include <vector>
-//#include "../include/ClientProtocol.h"
 #include <boost/locale.hpp>
 #include <boost/thread.hpp>
 #include <boost/asio/ip/tcp.hpp>
@@ -39,7 +34,6 @@ using boost::asio::ip::tcp;
                 if (line.length()==0) continue;
 				ServerPacket *packet = protocol_ptr->processFromKeyboard(line);
                 if (packet==nullptr || packet->getOpcode()==0) {}
-//                    cout << "Invalid input from the keyboard" << endl;
                 else {
                     client_.sendPacket(packet);
                     if (packet->getOpcode()==10) break;
@@ -54,11 +48,9 @@ using boost::asio::ip::tcp;
         ConnectionHandler* connectionHandler = client_.getConnectionHandler();
         ClientProtocol* protocol_ptr = connectionHandler->getProtocol();
         EncoderDecoder* encdec = connectionHandler->getEncdec();
-//        encdec->printSize();
         vector <char> dataVecToSend;
         char nextChar;
         char dataCharArr[1];
-//        encdec->manualInitialization();
         int index=0;
 		while (connectionHandler->getConnectionState()==true){
 			if (connectionHandler->getBytes(dataCharArr, 1)) {
@@ -68,13 +60,11 @@ using boost::asio::ip::tcp;
                 if (receivedPacket != nullptr) {
                     index=0;
                     protocol_ptr->process(receivedPacket, connectionHandler);
-                    //delete (receivedPacket);
                 }
                 index++;
             }
             else
             {
-//                cout << "Getting the data from the server was failed " << endl;
             };
 
         }
@@ -97,14 +87,11 @@ using boost::asio::ip::tcp;
         encdec->cleanFields(); // VERY IMPORTANT
          toSendChar = vecToArr(*toSendVec); // I transfer the pointer, and the data inside it is changed. I point to the new change.
         connectionHandler->sendBytes(toSendChar, size); // sendBytes needs to get actual char[]
-        //delete (toSendChar); // delete te pointer I transfered it's material
-        //delete (toSendVec); // I delete the pointer returning from the encode
     }
 
 
 
 	char* client::vecToArr(vector<char>& v){
-		// Get a char pointer to the data in the vector
 		char* buf = &v[0];
 	    return buf;
 	}
@@ -113,28 +100,11 @@ using boost::asio::ip::tcp;
         return connectionHandler;
     }
 
-//
-//	vector<char>& client::arrToVec(char* c){
-//		int size=sizeof(c);
-//		vector<char> v (c, c+size);
-//		return v;
-//	}
-
 client::~client() {
 //    delete(connectionHandler);
 }
 
 string client::popString(vector<char>& bytes) {
-    //notice that we explicitly requesting that the string will be decoded from UTF-8
-    //this is not actually required as it is the default encoding in java.
-
-    /*
-    int len=bytes.length;
-    string result = new string(bytes, 0, len, StandardCharsets.UTF_8);
-    len = 0;
-    return result;
-    */
-
     std::string s(bytes.begin(), bytes.end());
     return s;
 
@@ -145,13 +115,6 @@ string communicateWithServerTask::popString(vector<char>& bytes) {
     //notice that we explicitly requesting that the string will be decoded from UTF-8
     //this is not actually required as it is the default encoding in java.
 
-    /*
-    int len=bytes.length;
-    string result = new string(bytes, 0, len, StandardCharsets.UTF_8);
-    len = 0;
-    return result;
-    */
-
     std::string s(bytes.begin(), bytes.end());
     return s;
 
@@ -161,14 +124,6 @@ string communicateWithServerTask::popString(vector<char>& bytes) {
 //
 int main (int argc, char *argv[]) {
     cout << "CHIN" << endl;
-    // Initialize host and port from the args.
-//    if (argc < 3) {
-//        std::cerr << "Usage: " << argv[0] << " host port" << std::endl << std::endl;
-//        return -1;
-//    }
-//
-//    std::string host = argv[1];
-//    short port = atoi(argv[2]);
     string host="127.0.0.1";
     short port = 6666;
 
@@ -181,7 +136,6 @@ int main (int argc, char *argv[]) {
     connectionHandler.manualInitializing();
     ConnectionHandler* connectionHandler_ptr = &connectionHandler;
     client Yosi(connectionHandler_ptr);
-    //Yosi.setConnected(true);
     connectionHandler_ptr->setConnectionState(true);
 
     readFromKeyboardTask rfkt(Yosi);
@@ -198,4 +152,3 @@ int main (int argc, char *argv[]) {
     return 0;
 }
 
- /* namespace client */
