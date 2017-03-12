@@ -80,8 +80,6 @@ ServerPacket* EncoderDecoder:: decodeNextByte(char nextByte, ConnectionHandler* 
         return packet_6_OR_10;
     }
     else {// When entering this segment, the opcode is initialized and NOT 6 or 10
-        //n
-        //delete (packet_6_OR_10);
         if (readSecond){
             // Zero at the end:  BCastPacket(9), DELRQPacket(8), LOGRQ(7), ErrorPacket(5), WRQPacket(2), RRQPacket(1)
             if (opcode==9 || opcode ==8 ||  opcode ==7 ||  opcode ==5 ||  opcode ==2 ||  opcode ==1  ) {
@@ -243,9 +241,7 @@ AckPacket* EncoderDecoder::readAckPacket(char nextByte){
 
 
 
-// TODO: Problem with the opcode of '10' and '1'
 // Checks the 6 cases of BCastPacket(9), ErrorPacket(5), RRQPacket(1), WRQPacket(2), DELRQPacket(8), LOGRQPacket(7)
-
 ServerPacket* EncoderDecoder::handleCasesWithZeroAtTheEnd(char nextByte){
 
 
@@ -342,7 +338,6 @@ vector<char>* EncoderDecoder::encode(ServerPacket* message){
     char lo = opcodeCharsArr[1];
     opcodeBytes->push_back(fo);
     opcodeBytes->push_back(lo);
-    //*opcodeBytes = arrToVec(opcodeCharsArr);
     if(opcode==1){
         vector<char>* response = encodeRRQ(message, *opcodeBytes);
         return response;
@@ -411,19 +406,15 @@ vector<char>* EncoderDecoder::encodeRRQ(ServerPacket* message_par, vector<char>&
     vector<char> fileNameBytes=getBytes(fileName);
     lenDana=lenDana+fileNameBytes.size()+1;
     vector<char>* response=new vector<char>;
-    //vector<char> response=new vector<char>(lenDana);
     for(unsigned int i=0;i<2;i++){
         char c = opcodeBytes.at(i);
         response->push_back(c);
-        //response.at(i)=opcodeBytes.at(i);
     }
     for(unsigned int j=0; j<fileNameBytes.size();j++){
         char c = fileNameBytes.at(j);
         response->push_back(c);
-        //response.at(j+2)=fileNameBytes.at(j);
     }
     response->push_back(0);
-    //response.at(response.size()-1)=0;
     return response;
 }
 
@@ -434,103 +425,71 @@ vector<char>* EncoderDecoder:: encodeWRQ(ServerPacket* message, vector<char>& op
     vector<char> fileNameBytes=getBytes(fileName);
     lenDana=lenDana+fileNameBytes.size()+1;
     vector<char>* response=new vector<char>;
-    //vector<char> response=new vector<char>(lenDana);
     for(unsigned int i=0;i<2;i++){
         char c = opcodeBytes.at(i);
         response->push_back(c);
-        //response.at(i)=opcodeBytes.at(i);
     }
     for(unsigned int j=0; j<fileNameBytes.size();j++){
         char n = fileNameBytes.at(j);
         response->push_back(n);
-        //response.at(j+2)=fileNameBytes.at(j);
     }
     response->push_back(0);
-    //response.at(response.size()-1)=0;
     return response;
 }
-/////////////////////////////////// TOOOOOOOOOOOOOOOOOOODOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 
 vector<char>* EncoderDecoder::encodeData(ServerPacket* message, vector<char>& opcodeBytes){
     short packetSize=((DataPacket*)message)->getPacketSize();
-//		// Example
-//		char* opcodeCharsArr;
-//		shortToBytes(opcode,opcodeCharsArr);
-//		*opcodeBytes = arrToVec(opcodeCharsArr);
-//		// Before
-//		vector<char>* packetSizeBytes=shortToBytes(packetSize);
-    // Now
-    //vector<char>* packetSizeBytes;
     char* packetSizeCharArr=new char[2];
 
     shortToBytes(packetSize,packetSizeCharArr);
     *packetSizeByte = arrToVec(packetSizeCharArr);
-    // End
     short blockNum=((DataPacket*)message)->getBlockNum();
     char* blockNumCharArr=new char[2];
     shortToBytes(blockNum,blockNumCharArr);
     *blockNumBytes = arrToVec(blockNumCharArr);
-//		vector<char>* blockNumBytes=shortToBytes(blockNum);
     vector<char> DataBytes=((DataPacket*)message)->getData();
     lenDana=lenDana+packetSizeByte->size()+blockNumBytes->size()+DataBytes.size();
     vector<char>* response=new vector<char>;
-    //vector<char> response=new vector<char>(lenDana);
     for(unsigned int i=0;i<2;i++){
         char c = opcodeBytes.at(i);
         response->push_back(c);
-        //response.at(i)=opcodeBytes.at(i);
     }
     for(unsigned int j=0; j<2;j++){
         char c2 = packetSizeByte->at(j);
         response->push_back(c2);
-        //response.at(j+2)=packetSizeBytes.at(j);
     }
     for(unsigned int k=0;k<2;k++){
         char c3 = blockNumBytes->at(k);
         response->push_back(c3);
-        //response.at(k+4)=blockNumBytes.at(k);
     }
     for(unsigned int p=0; p<DataBytes.size();p++){
         char c4 = DataBytes.at(p);
         response->push_back(c4);
-        //		response.at(p+6)=DataBytes.at(p);
     }
     return response;
 }
 
 
 vector<char>* EncoderDecoder::encodeAck(ServerPacket* message, vector<char>& opcodeBytes){
-//		// Before
-//		short blockNum=((AckPacket*)message)->getBlockNum();
-//		vector<char>* blockNumBytes=shortToBytes(blockNum);
-    // Now
     short blockNum=((AckPacket*)message)->getBlockNum();
     char* blockNumCharArr=new char[2];
     shortToBytes(blockNum,blockNumCharArr);
     *blockNumBytes = arrToVec(blockNumCharArr);
     lenDana=lenDana+2;
     vector<char>* response=new vector<char>;
-    //vector<char> response=new vector<char>(lenDana);
     for(unsigned int i=0;i<2;i++){
         char c = opcodeBytes.at(i);
         response->push_back(c);
-        //response.at(i)=opcodeBytes.at(i);
     }
     for(unsigned int j=0; j<2;j++){
         char c3 = blockNumBytes->at(j);
         response->push_back(c3);
-        //response.at(j+2)=blockNumBytes.at(j);
     }
     return response;
 }
 
 
 vector<char>* EncoderDecoder::encodeError(ServerPacket* message, vector<char>& opcodeBytes){
-    // Before
-//		short errorCode=((ErrorPacket*)message)->getErrorCode();
-//		vector<char>* errorCodeBytes=shortToBytes(errorCode);
-
-    // Now
     short errorCode=((ErrorPacket*)message)->getErrorCode();
     vector<char>* errorCodeBytes;
     char* errorCodeCharArr=new char[2];
@@ -551,26 +510,21 @@ vector<char>* EncoderDecoder::encodeError(ServerPacket* message, vector<char>& o
     lenDana=opcodeBytes.size()+errorCodeBytes->size()+errMsgBytes.size()+1;
 
     vector<char>* response=new vector<char>();
-    //vector<char> response=new vector<char>(lenDana);
     for(unsigned int i=0;i<2;i++){
         char c = opcodeBytes.at(i);
         response->push_back(c);
-        //	response.at(i)=opcodeBytes.at(i);
     }
 
     for(unsigned int j=0;j<2;j++){
         char c2 = manual.at(j);
         response->push_back(c2);
-        //response.at(j+2)=errorCodeBytes.at(j);
     }
 
     for(unsigned int j=0;j<errMsgBytes.size();j++){
         char c3 = errMsgBytes.at(j);
         response->push_back(c3);
-        //response.at(j+4)=errMsgBytes.at(j);
     }
     response->push_back(0);
-    //response.at(response.size()-1)=0;
     return response;
 }
 
@@ -580,19 +534,15 @@ vector<char>* EncoderDecoder::encodeLogRQ(ServerPacket* message, vector<char>& o
     vector<char> userNameBytes=getBytes(userName);
     lenDana=lenDana+userNameBytes.size()+1;
     vector<char>* response=new vector<char>;
-    //	vector<char> response=new vector<char>(lenDana);
     for(unsigned int i=0;i<2;i++){
         char c = opcodeBytes.at(i);
         response->push_back(c);
-        //response.at(i)=opcodeBytes.at(i);
     }
     for(unsigned int j=0; j<userNameBytes.size();j++){
         char c4 = userNameBytes.at(j);
         response->push_back(c4);
-        //response.at(j+2)=userNameBytes.at(j);
     }
     response->push_back(0);
-    //response.at(response.size()-1)=0;
     return response;
 }
 
@@ -602,19 +552,15 @@ vector<char>* EncoderDecoder::encodeDelRQ(ServerPacket* message, vector<char>& o
     vector<char> fileNameBytes=getBytes(fileName);
     lenDana=lenDana+fileNameBytes.size()+1;
     vector<char>* response=new vector<char>;
-    //vector<char> response=new vector<char>(lenDana);
     for(unsigned int i=0;i<2;i++){
         char c = opcodeBytes.at(i);
         response->push_back(c);
-        //response.at(i)=opcodeBytes.at(i);
     }
     for(unsigned int j=0; j<fileNameBytes.size();j++){
         char c3 = fileNameBytes.at(j);
         response->push_back(c3);
-        //response.at(j+2)=fileNameBytes.at(j);
     }
     response->push_back(0);
-    //	response.at(response.size()-1)=0;
     return response;
 }
 
@@ -626,25 +572,20 @@ vector<char>* EncoderDecoder::encodeBCast(ServerPacket* message, vector<char>& o
 
     lenDana=lenDana+1+fileNameBytes.size()+1;
     vector<char>* response=new vector<char>;
-    //vector<char> response=new vector<char>(lenDana);
 
     for(unsigned int i=0;i<2;i++){
         char c = opcodeBytes.at(i);
         response->push_back(c);
-        //response.at(i)=opcodeBytes.at(i);
     }
 
     response->push_back(delOrAdd);
-    //response.at(2)=delOrAdd;
 
     for(unsigned int j=0;j<fileNameBytes.size();j++){
         char n = fileNameBytes.at(j);
         response->push_back(n);
-        //response.at(j+3)=fileNameBytes.at(j);
     }
 
     response->push_back(0);
-    //response.at(response.size()-1)=0;
     return response;
 }
 
@@ -690,15 +631,6 @@ short EncoderDecoder::bytesToShort(vector<char>& bytesArr){
     return result;
 }
 
-//
-//	vector<char>* EncoderDecoder::shortToBytes(short num)
-//	{
-//		vector<char> bytesArr(2);
-//		bytesArr[0]=((num >> 8) & 0xFF) ;
-//		bytesArr[1] = (num & 0xFF);
-//		vector<char>* vec_ptr = &bytesArr;
-//		return vec_ptr;
-//	}
 
 void EncoderDecoder::shortToBytes(short num, char* bytesArr)
 {
@@ -711,24 +643,16 @@ void EncoderDecoder::shortToBytes(short num, char* bytesArr)
 
 short EncoderDecoder::returnTwoFirstBytes(vector<char> dataToDecode) {
     vector<char> newToDecode;
-    //	vector<char> newToDecode= new vector<char>(2);
     for (unsigned int i = 0; i < 2; i++) {
         char c=dataToDecode.at(i);
         newToDecode.push_back(c);
     }
-    //	newToDecode.at(i)=dataToDecode.at(i);
     short returnShort=bytesToShort(newToDecode);
     return returnShort;
 }
 
 
 void EncoderDecoder::popTwoFirstBytes(vector<char>* dataToDecode){
-    /*
-    vector<char> newDataToDecode= new vector<char>(dataToDecode.length-2);
-    for(int i=0; i<newDataToDecode.size();i++)
-        newDataToDecode.at(i)=dataToDecode.at(i+2);
-    this.dataToDecode=newDataToDecode;
-    this.len=this.len-2; */
     dataToDecode->erase(dataToDecode->begin());
     dataToDecode->erase(dataToDecode->begin());
 }
@@ -741,35 +665,14 @@ char EncoderDecoder::returnFirstByte(vector<char>& dataToDecode){
 
 
 void EncoderDecoder::popFirstByte(vector<char>* dataToDecode){
-    /*
-    vector<char> newDataToDecode= new vector<char>(dataToDecode.length-1);
-    for(int i=0; i<newDataToDecode.size();i++)
-        newDataToDecode.at(i)=dataToDecode.at(i+1);
-    this.dataToDecode=newDataToDecode; */
     dataToDecode->erase(dataToDecode->begin());
 }
-
-//	template<typename ServerPacket >
-//	void EncoderDecoder<ServerPacket>::popLastByte(vector<char> dataToDecode){
-//		/*
-//		vector<char> newDataToDecode= new byte[dataToDecode.size()-1];
-//		for(int i=1; i<newDataToDecode.size();i++)
-//			newDataToDecode.at(i)=dataToDecode.at(i);
-//		this.dataToDecode=newDataToDecode; */
-//		dataToDecode.pop_back();
-//	}
 
 
 string EncoderDecoder::popString(vector<char>& bytes) {
     //notice that we explicitly requesting that the string will be decoded from UTF-8
     //this is not actually required as it is the default encoding in java.
 
-    /*
-    int len=bytes.length;
-    string result = new string(bytes, 0, len, StandardCharsets.UTF_8);
-    len = 0;
-    return result;
-    */
 
     std::string s(bytes.begin(), bytes.end());
     return s;
