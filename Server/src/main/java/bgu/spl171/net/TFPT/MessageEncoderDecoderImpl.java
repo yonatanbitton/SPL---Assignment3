@@ -32,12 +32,10 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<ServerPa
 	private boolean removedOpcode=false;
 	private boolean readSecond=false;
 
-	// TODO: Handle the DataPacket Case
 	@Override
 	public ServerPacket decodeNextByte(byte nextByte) {
 		ServerPacket packet_6_OR_10=null;
 			if (!isOpCodeInitialized) {
-//				System.out.println("Should be printed twice ");
 				packet_6_OR_10= initializeOpCode_and_dataToDecode_or_returnRelevantPackets(nextByte);
 			}
 			if (!removedOpcode && isOpCodeInitialized && readSecond) { 
@@ -79,7 +77,6 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<ServerPa
 			// STILL READING 
 			pushByte(nextByte); // Meaning that i'm still at the reading of the message, (Or at DataPacket case) 
 			currPos++;
-//			System.out.println("The currPos is " + currPos);
 			readSecond=isOpCodeInitialized;
 			return null;
 			
@@ -87,8 +84,6 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<ServerPa
 	}
 	
 	public void cleanFields(){
-//		for (int i=0; i<518; i++)
-//			dataToDecode[i]=0;
 		dataToDecode =new byte [518];
 		opcodeBytes[0]=0;
 		opcodeBytes[1]=0;
@@ -147,7 +142,6 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<ServerPa
 					finishedDataBlockNum=true;
 					blockNum=bytesToShort(blockNumDataBytes);
 					leftToRead=packetSize; // Before: leftToRead=packetSize
-				//	System.out.println("Left to read is " + leftToRead);
 					data=new byte[leftToRead];
 					return null;
 				}
@@ -190,14 +184,12 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<ServerPa
 
 			
 	
-	// TODO: Problem with the opcode of '10' and '1'
 	// Checks the 6 cases of BCastPacket(9), ErrorPacket(5), RRQPacket(1), WRQPacket(2), DELRQPacket(8), LOGRQPacket(7)
 	public ServerPacket handleCasesWithZeroAtTheEnd(byte nextByte){
 		if (nextByte=='\0') {
 			if (opcode==9){ // Meaning we need to return a BCastPacket
 				byte deleted_or_added=returnFirstByte(dataToDecode);
 				popFirstByte(dataToDecode);
-			//	popLastByte(dataToDecode);
 			 	dataToDecode=Arrays.copyOfRange(dataToDecode, 0, currPos-2); // Getting rid from the finish '0' and the rest
 				String s = popString(dataToDecode);
 				BCastPacket packet = new BCastPacket(opcode,deleted_or_added,s);
@@ -206,13 +198,11 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<ServerPa
 			
 			else if (opcode==8){ // Meaning we need to return a DELRQPacket
 				dataToDecode=Arrays.copyOfRange(dataToDecode, 0, currPos-2); // Getting rid from the finish '0' and the rest
-				//	popLastByte(dataToDecode);
 				String s = popString(dataToDecode);
 				DELRQPacket packet = new DELRQPacket(opcode,s);
 				return packet;
 			}
 			else if (opcode==7){ // Meaning we need to return a LOGRQPacket
-				//popLastByte(dataToDecode);
 				dataToDecode=Arrays.copyOfRange(dataToDecode, 0, currPos-2); // Getting rid from the finish '0' and the rest
 				String s = popString(dataToDecode);
 				LOGRQPacket packet = new LOGRQPacket(opcode,s);
@@ -222,20 +212,17 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<ServerPa
 				short errorCode=returnTwoFirstBytes(dataToDecode);
 				popTwoFirstBytes(dataToDecode);
 				dataToDecode=Arrays.copyOfRange(dataToDecode, 0, currPos-2); // Getting rid from the finish '0' and the rest
-				//	popLastByte(dataToDecode);
 				String s = popString(dataToDecode);
 				ErrorPacket packet = new ErrorPacket(opcode, errorCode, s);
 				return packet;
 			}
 			else if (opcode==2){ // Meaning we need to return a WRQPacket
 				dataToDecode=Arrays.copyOfRange(dataToDecode, 0, currPos-2); // Getting rid from the finish '0' and the rest
-				//	popLastByte(dataToDecode);
 				String s = popString(dataToDecode);
 				WRQPacket packet = new WRQPacket(opcode, s);
 				return packet;
 			}
 			else if (opcode==1){ // Meaning we need to return a RRQPacket
-			//	popLastByte(dataToDecode);
 				dataToDecode=Arrays.copyOfRange(dataToDecode, 0, currPos-2); // Getting rid from the finish '0' and the rest
 				String s = popString(dataToDecode);
 				RRQPacket packet = new RRQPacket(opcode, s);
@@ -247,17 +234,14 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<ServerPa
 	
 	public ServerPacket initializeOpCode_and_dataToDecode_or_returnRelevantPackets(byte nextByte){
 		if (!startedInitializingOpCode) { 
-			//pushByte(nextByte);
 			opcodeBytes[0]=nextByte;
 			startedInitializingOpCode=true;
 			return null;
 		}
 		else {
 			opcodeBytes[1]=nextByte;
-			//pushByte(nextByte);
 			this.opcode=bytesToShort(opcodeBytes);
 			isOpCodeInitialized=true;
-		//	popTwoFirstBytes(dataToDecode);
 			if (opcode==6) return new DIRQPacket(opcode);
 			else if (opcode==10) return new DiscPacket(opcode);
 			else return null;
@@ -333,7 +317,7 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<ServerPa
 			response[j+2]=fileNameBytes[j];
 		}
 		response[response.length-1]=0;
-		lenDana=2; // EXPERIMENTIAL
+		lenDana=2; 
 		return response;
 	}
 	
@@ -350,7 +334,7 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<ServerPa
 			response[j+2]=fileNameBytes[j];
 		}
 		response[response.length-1]=0;
-		lenDana=2; // EXPERIMENTIAL
+		lenDana=2; 
 		return response;
 	}
 	
@@ -375,7 +359,7 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<ServerPa
 		for(int p=0; p<DataBytes.length;p++){
 			response[p+6]=DataBytes[p];
 		}
-		lenDana=2; // EXPERIMENTIAL
+		lenDana=2; 
 		return response;
 	}
 	
@@ -391,7 +375,7 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<ServerPa
 		for(int j=0; j<2;j++){
 			response[j+2]=blockNumBytes[j];
 		}	
-		lenDana=2; // EXPERIMENTIAL
+		lenDana=2; 
 		return response;
 	}
 	
@@ -415,7 +399,7 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<ServerPa
 			response[j+4]=errMsgBytes[j];
 		}
 		response[response.length-1]=0;
-		lenDana=2; // EXPERIMENTIAL
+		lenDana=2; 
 		return response;
 	}
 	
@@ -431,7 +415,7 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<ServerPa
 			response[j+2]=userNameBytes[j];
 		}
 		response[response.length-1]=0;
-		lenDana=2; // EXPERIMENTIAL
+		lenDana=2; 
 		return response;
 	}
 	
@@ -447,22 +431,17 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<ServerPa
 			response[j+2]=fileNameBytes[j];
 		}
 		response[response.length-1]=0;
-		lenDana=2; // EXPERIMENTIAL
+		lenDana=2; 
 		return response;
 	}
 	
 	private byte[] encodeBCast(ServerPacket message, byte[] opcodeBytes){
 		byte delOrAdd=((BCastPacket)message).getDelOrAdd();
 		String fileName=((BCastPacket)message).getFileName();
-//		System.out.println("The filename string's length is " + fileName.length());
 		byte[] fileNameBytes=fileName.getBytes();
-//		System.out.println("The fileNameBytes array size is " + fileNameBytes.length);
 		int size = fileNameBytes.length-1;
-//		System.out.println("The last byte is " + fileNameBytes[size]);
-//		System.out.println("The lenDana BEFORE is " + lenDana);
 		lenDana=lenDana+1+fileNameBytes.length+1;
 		byte[] response=new byte[lenDana];
-//		System.out.println("The lenDana AFTER is " + lenDana);
 		for(int i=0;i<2;i++){
 			response[i]=opcodeBytes[i];
 		}
@@ -474,7 +453,7 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<ServerPa
 		}
 		
 		response[response.length-1]=0;
-		lenDana=2; // EXPERIMENTIAL
+		lenDana=2;
 		return response;	
 	}
 	
@@ -534,7 +513,6 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<ServerPa
     private String popString(byte[] bytes) {
         //notice that we explicitly requesting that the string will be decoded from UTF-8
         //this is not actually required as it is the default encoding in java.
-//    	System.out.println("Before the popString, the length is " + bytes.length);
     	int len=bytes.length;
         String result = new String(bytes, 0, len, StandardCharsets.UTF_8);
         len = 0;
