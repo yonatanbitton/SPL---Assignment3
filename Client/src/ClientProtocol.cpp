@@ -25,12 +25,7 @@ void ClientProtocol::process(ServerPacket* packet, ConnectionHandler* _connectio
     ConnectionHandler* connectionHandler=_connectionHandler_par;
     short opcode=packet->getOpcode();
     bool unfamiliar=false;
-//    try {
-//        if (opcode != 4 || opcode != 9 || opcode != 3 || opcode != 1 || opcode != 5)
-//            throw "Unfamiliar opcode on process";
-//    }   catch (string msg) {cout << msg << endl;}
     if ( (!(opcode==4)) && (!(opcode==9)) && (!(opcode==3)) && (!(opcode==1)) && (!(opcode==5)) ) {
-//        cout << "Unfamiliar opcode on process" << endl;
         unfamiliar=true;
     }
     if (unfamiliar==false) {
@@ -86,7 +81,6 @@ void ClientProtocol::dealWithACK(ServerPacket* packet, ConnectionHandler* connec
                         goingToFinish = true;
                     }
                 } else {
-//                    cout << "Cant find file " << endl;
                 }
             } else { // the blockNum is 1,..2,...3...
                 cout << "ACK " << blockNum << endl;
@@ -94,8 +88,6 @@ void ClientProtocol::dealWithACK(ServerPacket* packet, ConnectionHandler* connec
                     goingToFinish = true;
                 }// This function sends the next 512 bytes, and returns true if finished
             }
-//        delete (myPacket);
-
         }
     }
 }
@@ -122,25 +114,13 @@ bool ClientProtocol::sendNextPacket(ConnectionHandler* connectionHandler_par) {
 
 // Sends the opcodeBytes, packetSizeBytes, blockNumBytes
 void ClientProtocol::sendDataAttachments(short localPacketSize, ConnectionHandler* connectionHandler_par){
-   // generalSize = toSendVec->size();
     char* opcodeBytes = new char[2];
     shortToBytes(3, opcodeBytes);
-//    char firstOpcodeByte = toSendVec->at(0);
-//    char secondOpcodeByte = toSendVec->at(1);
-//    short packetSize=-1;
-//    if (generalSize>=512) {
-//        generalSize=generalSize-512;
-//        packetSize=512;
-//    }
-//    else // generalsize < 512
-//        packetSize=generalSize;
     char* packetSizeBytes = new char[2];
     shortToBytes(localPacketSize, packetSizeBytes);
-//    char firstPacketsizeBytes =
     numOfChunksSent++;
     char* blockNumBytes = new char[2];
     shortToBytes(numOfChunksSent,blockNumBytes);
-//    cout << "The blockNumBytes=" << bytesToShort(blockNumBytes) << endl;
     vector<char>* attachment = new vector<char>();
     for (unsigned int i=0; i<2; i++) {
         attachment->push_back(opcodeBytes[i]);
@@ -170,7 +150,6 @@ void ClientProtocol::sendVecViaCH(vector<char>* dataToSendVec, ConnectionHandler
         connectionHandler->sendBytes(dataToSendChar, size);
     }
     else  {
-//        cout << "Can't send more then 512!" << endl;
     }
 }
 
@@ -207,41 +186,24 @@ void ClientProtocol::shortToBytes(short num, char* bytesArr)
     bytesArr[0] = ((num >> 8) & 0xFF);
     bytesArr[1] = (num & 0xFF);
 }
-//
-//// This function takes 1 chunk, sends it, and returns true if no chunks are left
-//bool ClientProtocol::sendNextPacket(ConnectionHandler* connectionHandler_par) {
-//    vector<char> *v = FileToUpload->at(numOfChunksSent);
-//    sendVecViaCH(v, connectionHandler_par);
-//    numOfChunksSent++;
-//    if (numOfChunksSent==FileToUpload->size()) return true;
-//    else return false;
-//
-//}
-
 
 void ClientProtocol::dealWithBCAST(ServerPacket* packet){ // AS
     BCastPacket* myPacket =static_cast<BCastPacket*>(packet);
-//    if (myPacket->getFileName().compare("def")==0 ) {
-//        throw (2);
-//    }
     string fileName = myPacket->getFileName();
     char add_or_del = myPacket->getDelOrAdd();
     string add_or_del_str;
     if (add_or_del == 0)  add_or_del_str="del";
         else if (add_or_del== 1) add_or_del_str="add";
     cout << "BCAST " <<  add_or_del_str << " " << fileName << endl;
-   // delete (myPacket);
 }
 void ClientProtocol::dealWithDATA(ServerPacket* packet, ConnectionHandler* connectionHandler_par) { // readReq or dirqReq
     DataPacket *myPacket = static_cast<DataPacket *>(packet);
     short blockNum = myPacket->getBlockNum();
     vector<char> data = myPacket->getData();
     short packetSize = myPacket->getPacketSize();
-    //  delete(myPacket);
     if (packetSize > 512) {
         ErrorPacket *err = new ErrorPacket((short) 5, (short) 0, "dealWithData:: I've got a packet bigger then 512");
         sendPacket(err, connectionHandler_par);
-        //   delete (err);
     }
     if (ClientProtocol::lastOperation.compare("dirqReq") == 0) {
         if (packetSize == 0) {
@@ -316,15 +278,6 @@ void ClientProtocol::sendSafeAckPacket(AckPacket* packet, ConnectionHandler* con
     sendVecViaCH(toSend, connectionHandler_par);
 }
 
-
-//    string ClientProtocol::popString(vector<char> &bytes) {
-//
-//        std::string s(bytes.begin(), bytes.end());
-//        return s;
-//
-//    }
-
-
     void ClientProtocol::printDirq(vector<char> &v) {
         string ans_str = "";
         for (unsigned int i = 0; i < v.size(); i++) {
@@ -350,7 +303,6 @@ void ClientProtocol::sendSafeAckPacket(AckPacket* packet, ConnectionHandler* con
             ErrorPacket *err = new ErrorPacket((short) 5, (short) 0,
                                                "The data received is not because of file uploading nor dirq request :O");
             sendPacket(err, connectionHandler_par);
-            // delete (err);
         }
 
     }
