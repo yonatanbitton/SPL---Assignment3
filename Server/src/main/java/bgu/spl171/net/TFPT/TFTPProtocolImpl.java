@@ -44,8 +44,6 @@ public class TFTPProtocolImpl implements BidiMessagingProtocol<ServerPacket>{
 	// By the assignment instructions. 
 	@Override
 	public void process(ServerPacket message) {
-//			System.out.println("I'm at the process");
-            //TODO: Take Care of getting an Acknowledgment
             short opcode=message.getOpcode();       
             if (opcode==7)
             	DealWithLOGRQ(message); // There are 2 possible errors. myConnectionState=true (I'm logged in) or there is a userName with a same userName as me.
@@ -55,7 +53,6 @@ public class TFTPProtocolImpl implements BidiMessagingProtocol<ServerPacket>{
              		ErrorPacket errorPacket=new ErrorPacket(((short)5), (short)0, "Not defined");
 				    if(opcode==1)
 						try {
-//							System.out.println("Going to deal with RRQ");
 							DealWithRRQ(message);
 						} catch (IOException e) {
 							throw new RuntimeException("ReadingProblem at RRQ");
@@ -63,49 +60,40 @@ public class TFTPProtocolImpl implements BidiMessagingProtocol<ServerPacket>{
 				    
 					else if(opcode==2)
 						try {
-//							System.out.println("Going to deal with WRQ");
 							DealWithWRQ(message);
 						} catch (IOException e1) {
 							throw new RuntimeException("WritingProblem at WRQ");
 						}
 				    
 					else if(opcode==3){
-//						System.out.println("Going to deal with recieving data");
 				    	DealWithRecievingData(message); 
 					}
 				    else if(opcode==4)
 						try {
-//							System.out.println("Going to deal with ACK");
 							DealWithACK(message);
 						} catch (IOException e) {
 							throw new RuntimeException("ReadingProblem at ACK");
 						}
 				    
 					else if(opcode==5) {// If the client send ErrorPacket, I return error packet
-//						System.out.println("Going to deal with ERROR");
 						dealWithERROR(message);
 					}
 				    else if(opcode==6)
 						try {
-//							System.out.println("Going to deal with DIRQ");
 							DealWithDIRQ(message);
 						} catch (IOException e) {
 							throw new RuntimeException("WritingProblem at DIRQ");
 						}
 				    
 					else if(opcode==8){
-//						System.out.println("Going to deal with DELRQ");
 						DealWithDELRQ(message);
 					}
 				    else if(opcode==9) {// If the client send BCastPacket, I return error packet 
-//						System.out.println("Send error because of getting BCastPacket");
 				    	myConnections.send(myId, errorPacket);
 				    }
 				    else if(opcode==10) { 
-//						System.out.println("Going to deal with disc");
 				    	DealWithDisc(message);   
 				    } else if (opcode!=7){ // Not a valid opcode
-//				    	System.out.println("NOT VALID OPCODE");
 				    	ErrorPacket notValidOpcode=new ErrorPacket(((short)5), ((short)4), "Illegal TFTP operation - Unknown opcode");
 		                myConnections.send(myId,notValidOpcode);
 				    }
@@ -116,7 +104,6 @@ public class TFTPProtocolImpl implements BidiMessagingProtocol<ServerPacket>{
    	}
 	
 	public void DealWithLOGRQ(ServerPacket message){
-//		System.out.println("I'm dealing with the LOGRQ");
 		if (myConnectionState==false){ 
             String clientName=((LOGRQPacket)message).getUserName();
             //Add a new connection to connections and update state to logged in  
@@ -133,10 +120,7 @@ public class TFTPProtocolImpl implements BidiMessagingProtocol<ServerPacket>{
         	}
         	if (!loggedIn){
             	AckPacket ack = new AckPacket((short)4, (short)0);  // Except data & dirq
-	        //	numOfUsers=numOfUsers+1;
-	           //myId=myId.intValue()+numOfUsers.intValue();
 	            loggedInUsers.put(clientName, myId);
-//	            System.out.println("At the process, before sending ACK 0 in return");
 	        	myConnections.send(myId, ack);
 	            myConnectionState=true;
         	}
@@ -203,14 +187,10 @@ public class TFTPProtocolImpl implements BidiMessagingProtocol<ServerPacket>{
 	// Cuts from b the first 512bytes and sends it with the appropriate blockNum
 	private void handleReadingACK() throws IOException{		 
     	// b is a large byte array
-//		System.out.println("I'm at handleReadingACK");
 		if (toDownloadBytesArr!=null){
 	    	numberOfPacketsNeeded=(toDownloadBytesArr.length / 512);
 	    	lastPacketSize = toDownloadBytesArr.length % 512;
-//	    	System.out.println("numberOfPacketsNeeded is " + numberOfPacketsNeeded);
-//	    	System.out.println("LastPacketSize is " + lastPacketSize);
 	    	if (lastPacketSize>=0) numberOfPacketsNeeded++;
-//	    	System.out.println("numberOfPacketsNeeded is " + numberOfPacketsNeeded);
 	    	
 	    	// If there is a need for >2 packets, create the first one, shorten the big one, remember who we sent, reduce the number of packets needed, and send.
 	    	if (toDownloadBytesArr.length>=512) {
@@ -236,13 +216,6 @@ public class TFTPProtocolImpl implements BidiMessagingProtocol<ServerPacket>{
 					toDownloadBytesArr=null;
 					blockNumToSendByAck=1;
 	    		}
-//	    	{
-//	    		System.out.println("Number of packets Needed = 1. Prepering DataPacket");
-//	    		DataPacket ans = new DataPacket((short)3, (short)toDownloadBytesArr.length, (short) blockNumToSendByAck, toDownloadBytesArr);
-//				myConnections.send(myId, ans);
-//				toDownloadBytesArr=null;
-//				blockNumToSendByAck=1;
-//	    	}
     	} else {
     	}
 	}
@@ -341,8 +314,6 @@ public class TFTPProtocolImpl implements BidiMessagingProtocol<ServerPacket>{
 			else if (packetSize<512){ // Knows I need to assemble the file.
 				byte[] lastData = p.getData();
 				wholeFile.add(lastData);
-				//File freeSpace = new File("Files/"); // Checks if there is enough space
-				//long space = freeSpace.getFreeSpace();
 				accSize=accSize+packetSize;
 				byte[] res = new byte[accSize];
 				int index=0;
@@ -353,11 +324,6 @@ public class TFTPProtocolImpl implements BidiMessagingProtocol<ServerPacket>{
 						index++;
 					}					
 				}
-//	 			if (res.length>space) {
-//	 				ErrorPacket error = new ErrorPacket((short)5, (short)3, "Disk full or allocation exceeded - no room in disk");
-//	 				myConnections.send(numOfUsers, error);
-//	 			}
-//	 			else { // There is enough space, can create the new file with the result
 	 				String path = "Files"+File.separator+goingToBeReceived;
 	 				try {
 						FileOutputStream stream = new FileOutputStream(path);
@@ -427,8 +393,6 @@ public class TFTPProtocolImpl implements BidiMessagingProtocol<ServerPacket>{
 				myConnections.send(myId, ans);
     		}
     		else{ //lastPacketSize=0
-//    			DataPacket ans = new DataPacket((short)3, (short)b.length, (short) blockNumToSend, b);
-//				myConnections.send(myId, ans);
 				byte[] emptyData = new byte[0];
 				DataPacket emptyPacket = new DataPacket((short)3, (short)0, (short)blockNumToSend, emptyData);
 				myConnections.send(myId, emptyPacket);
@@ -471,14 +435,11 @@ public class TFTPProtocolImpl implements BidiMessagingProtocol<ServerPacket>{
 	
 	private void DealWithDisc(ServerPacket message)
 	{
-          // DiscPacket p = (DiscPacket) message; 
-		   shouldTerminate=true;
-		   String keyRepresent = findKeyRepresentMyId();
+           shouldTerminate=true;
+	   String keyRepresent = findKeyRepresentMyId();
            loggedInUsers.remove(keyRepresent);
-		   //numOfUsers=numOfUsers-1; // Reduce the number of connected
            AckPacket packet = new AckPacket((short)4, (short)0);
            myConnections.send(myId, packet);
-           //myConnections.disconnect(numOfUsers);
 	}
 	
 	private String findKeyRepresentMyId(){
@@ -546,7 +507,6 @@ public class TFTPProtocolImpl implements BidiMessagingProtocol<ServerPacket>{
 
 
 	public boolean getConnectionState() {
-		// TODO Auto-generated method stub
 		return myConnectionState;
 	}
 	
