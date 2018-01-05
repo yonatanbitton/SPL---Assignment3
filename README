@@ -8,8 +8,3 @@ Activation instructions:
    Path is : /home/yonatanbitton/workspace/spl/ass3-TFTPServerClient/Client
    a. First write "make" to compile with the makefile.
    b. ./bin/TFTPclient - to start running. (Can change host & port at server, client if you'd like, current localhost, 6666.
-
-
-Game rules explained at assignment1-spl172.pdf 
-Path is : /home/yonatanbitton/workspace/spl/ass3-TFTPServerClient
-
